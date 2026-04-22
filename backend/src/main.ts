@@ -16,6 +16,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
   // Global validation pipe — applies to every route automatically
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
