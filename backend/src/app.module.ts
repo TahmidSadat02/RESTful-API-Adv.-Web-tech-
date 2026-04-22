@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/guard/jwt.guard';
 import { RolesGuard } from './auth/guard/roles.guard';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -28,12 +29,14 @@ import { RolesGuard } from './auth/guard/roles.guard';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
+        autoLoadEntities: true,
         entities: [User],
         synchronize: true, // Keep this true for development only
       }),
     }),
     UserModule,
     AuthModule,
+    MenuModule,
   ],
   controllers: [AppController],
   providers: [
