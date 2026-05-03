@@ -8,17 +8,7 @@ export default function GlobalNotification() {
   if (!notification) return null;
 
   return (
-    <div style={{
-      backgroundColor: '#10b981', // Professional green
-      color: 'white',
-      textAlign: 'center',
-      padding: '12px',
-      fontWeight: 'bold',
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000,
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    }}>
+    <div className="bg-emerald-500 text-white text-center py-3 font-bold sticky top-0 z-50 shadow-md">
       {notification}
     </div>
   );
