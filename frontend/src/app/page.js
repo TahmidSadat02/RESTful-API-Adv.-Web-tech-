@@ -1,22 +1,18 @@
 "use client";
 import { useContext, useEffect } from 'react';
 import { AppContext } from './context/AppContext';
-import AddMenuItem from './components/AddMenuItem';
 
 export default function MenuPage() {
-  const { menuItems, loading, fetchMenu, token } = useContext(AppContext);
+  const { menuItems, loading, fetchMenu } = useContext(AppContext);
 
   useEffect(() => {
     fetchMenu();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return (
     <div className="py-8">
       <h2 className="text-4xl font-bold text-gray-900 mb-8 tracking-tight">Our Menu</h2>
-
-      {/* Security Gate */}
-      {token && <AddMenuItem onAddSuccess={fetchMenu} />}
 
       {loading ? (
         <div className="text-center py-12 text-gray-500 text-lg">Loading freshly brewed menu...</div>
