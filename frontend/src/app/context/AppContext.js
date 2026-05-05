@@ -32,7 +32,8 @@ export const AppProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
+    const storedToken =
+      localStorage.getItem('token') || localStorage.getItem('accessToken');
     if (storedToken) {
       setToken(storedToken);
       try {
@@ -41,6 +42,7 @@ export const AppProvider = ({ children }) => {
       } catch (error) {
         console.error("Invalid token");
         localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
       }
     }
     setLoading(false);
@@ -49,6 +51,7 @@ export const AppProvider = ({ children }) => {
   const login = (newToken) => {
     setToken(newToken);
     localStorage.setItem('token', newToken);
+    localStorage.setItem('accessToken', newToken);
     try {
       const decoded = jwtDecode(newToken);
       setUserRole(decoded.role); 
@@ -62,6 +65,7 @@ export const AppProvider = ({ children }) => {
     setToken(null);
     setUserRole(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     triggerNotification("Logged out successfully");
     router.push('/');
   };

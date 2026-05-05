@@ -1,112 +1,113 @@
 "use client";
 import { useState, useContext } from 'react';
-import api from '../lib/axios';
 import { AppContext } from '../context/AppContext';
 
 export default function AddMenuItem({ onAddSuccess }) {
-  const { triggerNotification } = useContext(AppContext);
 
-  const [formData, setFormData] = useState({ name: '', description: '', price: '' });
-  const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Item Name is required.';
-    if (!formData.description.trim()) newErrors.description = 'Description is required.';
-    const priceNum = parseFloat(formData.price);
-    if (!formData.price.trim() || isNaN(priceNum) || priceNum <= 0) {
-      newErrors.price = 'Price must be greater than 0.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const { token, triggerNotification } = useContext(AppContext);
+  
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError('');
-    
-    if (validateForm()) {
-      try {
-        const response = await api.post('/menu', {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price)
-        });
+    setError('');
+    setLoading(true);
 
-        if (response.status === 201) {
-          setFormData({ name: '', description: '', price: '' });
-          triggerNotification("Item added successfully!");
-          if (onAddSuccess) onAddSuccess();
-        }
-      } catch (err) {
-        setServerError(err.response?.data?.message || 'Server error. Are you logged in as an Admin?');
+    try {
+      const response = await fetch('http://localhost:3000/menu', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          price: parseFloat(price), // Backend expects a number
+          isAvailable: true
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to add item');
       }
+
+
+      setName('');
+      setDescription('');
+      setPrice('');
+      triggerNotification(`${name} was added to the menu!`);
+      if (onAddSuccess) onAddSuccess();
+      
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const inputBaseClass = "w-full p-3 bg-gray-50 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:bg-white transition-all";
+  const inputClass = "w-full p-3 bg-gray-50 border border-gray-300 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:border-emerald-600 transition-all";
 
   return (
-    <div className="bg-white p-8 rounded-2xl border border-gray-200 mb-10 shadow-sm">
+    <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm mb-8">
       <h3 className="text-xl font-bold text-gray-900 mb-6">Add New Menu Item</h3>
       
-      {serverError && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 text-sm font-medium border border-red-100">
-          {serverError}
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 text-sm font-bold border border-red-200">
+          {error}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 items-start">
-        <div className="flex-1 w-full">
+        <div className="w-full md:w-1/3">
           <input
             type="text"
-            name="name"
-            placeholder="Item Name"
-            value={formData.name}
-            onChange={handleChange}
-            className={`${inputBaseClass} ${errors.name ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'}`}
+            placeholder="Item Name (e.g., Choco Coffee)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className={inputClass}
           />
-          {errors.name && <p className="text-red-500 text-xs mt-2 font-medium">{errors.name}</p>}
         </div>
-
-        <div className="flex-1 w-full">
+        
+        <div className="w-full md:w-1/3">
           <input
             type="text"
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            className={`${inputBaseClass} ${errors.description ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'}`}
+            placeholder="Description (e.g., Joss)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            className={inputClass}
           />
-          {errors.description && <p className="text-red-500 text-xs mt-2 font-medium">{errors.description}</p>}
         </div>
-
-        <div className="w-full md:w-32">
+        
+        <div className="w-full md:w-1/6">
           <input
             type="number"
             step="0.01"
-            name="price"
             placeholder="Price"
-            value={formData.price}
-            onChange={handleChange}
-            className={`${inputBaseClass} ${errors.price ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200'}`}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            className={inputClass}
           />
-          {errors.price && <p className="text-red-500 text-xs mt-2 font-medium">{errors.price}</p>}
         </div>
 
-        <button 
-          type="submit" 
-          className="w-full md:w-auto px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors whitespace-nowrap"
-        >
-          Add to Menu
-        </button>
+        <div className="w-full md:w-1/6">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-lg transition-colors disabled:bg-gray-400"
+          >
+            {loading ? 'Adding...' : 'Add to Menu'}
+          </button>
+        </div>
       </form>
     </div>
   );
