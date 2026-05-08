@@ -16,15 +16,16 @@ export class MailService {
     });
   }
 
-  async sendOrderConfirmation(email: string, name: string, orderId: number, total: number) {
+  async sendOrderConfirmation(email: string, name: string, orderId: number, total: number, items: any[]) {
     await this.mailerService.sendMail({
       to: email,
       subject: `Order Confirmation - #${orderId}`,
-      template: './order-confirmation', // Matches order-confirmation.hbs
+      template: './order-confirmation',
       context: { 
         customerName: name,
         orderId: orderId,
         totalPrice: total.toFixed(2),
+        items: items 
       },
     });
   }

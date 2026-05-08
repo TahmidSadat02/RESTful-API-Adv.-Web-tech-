@@ -42,7 +42,15 @@ export class OrdersService {
     const savedOrder = await this.orderRepository.save(order);
 
     
-    this.mailService.sendOrderConfirmation(user.email, user.fullName || 'Customer', savedOrder.id, totalPrice)
+
+    const emailItems = orderItems.map(item => ({
+      name: item.menuItem.name,
+      quantity: item.quantity,
+      price: (item.unitPrice * item.quantity).toFixed(2)
+    }));
+
+
+    this.mailService.sendOrderConfirmation(user.email, user.fullName || 'Customer', savedOrder.id, totalPrice, emailItems)
       .catch(err => console.error('Failed to send order email:', err));
 
     return savedOrder;
