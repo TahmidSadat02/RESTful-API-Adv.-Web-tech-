@@ -40,7 +40,7 @@ export const AppProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(storedToken);
         setUserRole(decoded.role);
-        setUserName(decoded.fullName || decoded.email);
+        setUserName(decoded.fullName);
       } catch (error) {
         console.error("Invalid token");
         localStorage.removeItem('token');
@@ -57,7 +57,7 @@ export const AppProvider = ({ children }) => {
     try {
       const decoded = jwtDecode(newToken);
       setUserRole(decoded.role);
-      setUserName(decoded.fullName || decoded.email);
+      setUserName(decoded.fullName);
     } catch (e) {
       console.error("Failed to decode token on login");
     }
