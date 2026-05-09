@@ -8,7 +8,8 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [token, setToken] = useState(null);
-  const [userRole, setUserRole] = useState(null); 
+  const [userRole, setUserRole] = useState(null);
+  const [userName, setUserName] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState('');
@@ -39,6 +40,7 @@ export const AppProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(storedToken);
         setUserRole(decoded.role);
+        setUserName(decoded.fullName || decoded.email);
       } catch (error) {
         console.error("Invalid token");
         localStorage.removeItem('token');
@@ -54,7 +56,8 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('accessToken', newToken);
     try {
       const decoded = jwtDecode(newToken);
-      setUserRole(decoded.role); 
+      setUserRole(decoded.role);
+      setUserName(decoded.fullName || decoded.email);
     } catch (e) {
       console.error("Failed to decode token on login");
     }
@@ -64,6 +67,7 @@ export const AppProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUserRole(null);
+    setUserName(null);
     localStorage.removeItem('token');
     localStorage.removeItem('accessToken');
     triggerNotification("Logged out successfully");
@@ -73,7 +77,8 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{ 
       token, 
-      userRole, 
+      userRole,
+      userName,
       login, 
       logout, 
       menuItems, 

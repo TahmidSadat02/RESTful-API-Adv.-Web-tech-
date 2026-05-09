@@ -5,7 +5,7 @@ import { AppContext } from './context/AppContext';
 import api from './lib/axios';
 
 export default function MenuPage() {
-  const { menuItems, loading, fetchMenu, token, triggerNotification } = useContext(AppContext);
+  const { menuItems, loading, fetchMenu, token, userName, triggerNotification } = useContext(AppContext);
   const router = useRouter();
   const [orderingId, setOrderingId] = useState(null);
   
@@ -62,7 +62,9 @@ export default function MenuPage() {
   return (
     <div className="py-8">
       <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-        <h1 className="text-3xl font-bold text-amber-900 mb-2">Welcome to Coffee and Code </h1>
+        <h1 className="text-3xl font-bold text-amber-900 mb-2">
+          {token && userName ? `Welcome back, ${userName}! ☕` : 'Welcome to Coffee and Code ☕'}
+        </h1>
         <p className="text-amber-800 font-medium">Where great coffee meets great code. Enjoy our curated selection of premium brews.</p>
       </div>
       <h2 className="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">Our Menu</h2>
