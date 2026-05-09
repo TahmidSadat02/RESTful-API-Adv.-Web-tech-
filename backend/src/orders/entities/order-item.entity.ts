@@ -7,10 +7,10 @@ export class OrderItem {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Order, order => order.items, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   order!: Order;
 
-  @ManyToOne(() => Menu, menu => menu.id)
+  @ManyToOne(() => Menu, (menu) => menu.id)
   menuItem!: Menu;
 
   @Column('int')

@@ -20,19 +20,21 @@ export class OrdersService {
     const orderItems: OrderItem[] = [];
 
     for (const itemDto of createOrderDto.items) {
-      const menuItem = await this.menuRepository.findOne({ where: { id: itemDto.menuItemId } });
-      if (!menuItem) throw new NotFoundException(`Item ${itemDto.menuItemId} not found`);
+      const menuItem = await this.menuRepository.findOne({
+        where: { id: itemDto.menuItemId },
+      });
+      if (!menuItem)
+        throw new NotFoundException(`Item ${itemDto.menuItemId} not found`);
 
       const orderItem = new OrderItem();
       orderItem.menuItem = menuItem;
       orderItem.quantity = itemDto.quantity;
       orderItem.unitPrice = menuItem.price;
-      
+
       totalPrice += menuItem.price * itemDto.quantity;
       orderItems.push(orderItem);
     }
 
-    
     const order = this.orderRepository.create({
       customer: { id: user.userId },
       totalPrice,
@@ -41,48 +43,51 @@ export class OrdersService {
 
     const savedOrder = await this.orderRepository.save(order);
 
-    
-
-    const emailItems = orderItems.map(item => ({
+    const emailItems = orderItems.map((item) => ({
       name: item.menuItem.name,
       quantity: item.quantity,
-      price: (item.unitPrice * item.quantity).toFixed(2)
+      price: (item.unitPrice * item.quantity).toFixed(2),
     }));
 
-
-    this.mailService.sendOrderConfirmation(user.email, user.fullName || 'Customer', savedOrder.id, totalPrice, emailItems)
-      .catch(err => console.error('Failed to send order email:', err));
+    this.mailService
+      .sendOrderConfirmation(
+        user.email,
+        user.fullName || 'Customer',
+        savedOrder.id,
+        totalPrice,
+        emailItems,
+      )
+      .catch((err) => console.error('Failed to send order email:', err));
 
     return savedOrder;
   }
 
-  
   async findAllOrders() {
     return this.orderRepository.find({
-      relations: ['customer', 'items', 'items.menuItem'], 
-      order: { createdAt: 'DESC' }, 
+      relations: ['customer', 'items', 'items.menuItem'],
+      order: { createdAt: 'DESC' },
     });
   }
 
-  
   async updateOrderStatus(id: number, status: string) {
-    const order = await this.orderRepository.findOne({ 
+    const order = await this.orderRepository.findOne({
       where: { id },
-      relations: ['customer'] 
+      relations: ['customer'],
     });
-    
+
     if (!order) throw new NotFoundException(`Order #${id} not found`);
 
     order.status = status as any;
     const updatedOrder = await this.orderRepository.save(order);
 
-    
-    this.mailService.sendOrderStatusUpdate(
-      order.customer.email, 
-      order.customer.fullName || 'Customer', 
-      order.id, 
-      status
-    ).catch(err => console.error('Failed to send status email:', err));
+    this.mailService
+      .sendOrderStatusUpdate(
+        order.customer.email,
+        order.customer.fullName || 'Customer',
+        order.id,
+        status,
+      )
+      .catch((err) => console.error('Failed to send status email:', err));
 
     return updatedOrder;
   }

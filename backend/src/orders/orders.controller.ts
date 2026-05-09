@@ -1,4 +1,13 @@
-import { Controller, Post, Body, UseGuards, Request, Param, Get, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Param,
+  Get,
+  Patch,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
@@ -20,13 +29,15 @@ export class OrdersController {
     return this.ordersService.findAllOrders();
   }
 
-  
   @UseGuards(JwtGuard)
   @Patch(':id/status')
   updateStatus(
-    @Param('id') id: string, 
-    @Body() updateOrderStatusDto: UpdateOrderStatusDto
+    @Param('id') id: string,
+    @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
-    return this.ordersService.updateOrderStatus(+id, updateOrderStatusDto.status);
+    return this.ordersService.updateOrderStatus(
+      +id,
+      updateOrderStatusDto.status,
+    );
   }
 }

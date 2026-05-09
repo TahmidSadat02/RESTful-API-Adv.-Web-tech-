@@ -16,8 +16,8 @@ import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [
     // 1. This loads your .env file
-    ConfigModule.forRoot({ 
-      isGlobal: true 
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
 
     // 2. This connects to PostgreSQL using the values from the .env file
@@ -53,7 +53,7 @@ import { OrdersModule } from './orders/orders.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard, // This applies your Role Bouncer to the whole app
-    }
+    },
   ],
 })
 export class AppModule {}

@@ -26,14 +26,15 @@ export class AuthController {
 
   @Get('profile')
   getProfile(@Request() req) {
-    return { message: 'This is a protected route',
-      user: req.user
-     };
+    return { message: 'This is a protected route', user: req.user };
   }
 
   @Roles(UserRole.ADMIN)
   @Get('admin-dashboard')
   getAdminDashboard(@Request() req) {
-    return { message: 'Welcome to the VIP lounge. Admin access granted.', user: req.user };
+    return {
+      message: 'Welcome to the VIP lounge. Admin access granted.',
+      user: req.user,
+    };
   }
 }

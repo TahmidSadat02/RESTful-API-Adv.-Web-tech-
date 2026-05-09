@@ -2,6 +2,7 @@
 import { createContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode'; 
+import api from '../lib/axios';
 
 export const AppContext = createContext();
 
@@ -16,11 +17,10 @@ export const AppProvider = ({ children }) => {
   const fetchMenu = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/menu');
-      const data = await res.json();
-      setMenuItems(data);
+      const response = await api.get('/menu');
+      setMenuItems(response.data);
     } catch (error) {
-      console.error("Failed to fetch menu");
+      console.error("Failed to fetch menu", error);
     } finally {
       setLoading(false);
     }

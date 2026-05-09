@@ -1,6 +1,7 @@
 "use client";
 import { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import api from '../lib/axios';
 
 export default function AddMenuItem({ onAddSuccess }) {
 
@@ -18,25 +19,16 @@ export default function AddMenuItem({ onAddSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/menu', {
-        method: 'POST',
+      await api.post('/menu', {
+        name,
+        description,
+        price: parseFloat(price), // Backend expects a number
+        isAvailable: true
+      }, {
         headers: {
-          'Content-Type': 'application/json',
-
-          'Authorization': `Bearer ${token}` 
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name,
-          description,
-          price: parseFloat(price), // Backend expects a number
-          isAvailable: true
-        }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to add item');
-      }
 
 
       setName('');
@@ -46,7 +38,12 @@ export default function AddMenuItem({ onAddSuccess }) {
       if (onAddSuccess) onAddSuccess();
       
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message;
+      if (Array.isArray(errorMessage)) {
+        setError(errorMessage.join(', '));
+      } else {
+        setError(errorMessage || err.message || 'Failed to add item');
+      }
     } finally {
       setLoading(false);
     }

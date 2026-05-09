@@ -25,7 +25,7 @@ import { join } from 'path';
         },
         template: {
           dir: join(process.cwd(), 'src/mail/templates'), // Ensure this points to your template folder
-          adapter: new HandlebarsAdapter(), 
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },
