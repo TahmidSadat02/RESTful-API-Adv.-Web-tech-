@@ -5,16 +5,33 @@ import { AppContext } from './context/AppContext';
 import api from './lib/axios';
 
 export default function MenuPage() {
-  const { menuItems, loading, fetchMenu, token, userName, triggerNotification } = useContext(AppContext);
+  
+  const { menuItems, loading, fetchMenu, token, userName, userRole, logout, triggerNotification } = useContext(AppContext);
   const router = useRouter();
   const [orderingId, setOrderingId] = useState(null);
   
-  
   const [quantities, setQuantities] = useState({});
 
+  
+  useEffect(() => {
+    
+    if (token && userRole === 'admin') {
+      
+      if (logout) {
+        logout(); 
+      } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+      }
+      
+      
+      router.push('/login');
+    }
+  }, [token, userRole, router, logout]);
+
+  
   useEffect(() => {
     fetchMenu();
-    
   }, []);
 
   
@@ -63,7 +80,7 @@ export default function MenuPage() {
     <div className="py-8">
       <div className="mb-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
         <h1 className="text-3xl font-bold text-amber-900 mb-2">
-          {token && userName ? `Welcome back, ${userName}! ☕` : 'Welcome to Coffee and Code ☕'}
+          {token && userName ? `Welcome back, ${userName}!` : 'Welcome to Coffee and Code '}
         </h1>
         <p className="text-amber-800 font-medium">Where great coffee meets great code. Enjoy our curated selection of premium brews.</p>
       </div>
