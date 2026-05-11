@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState('');
   const router = useRouter();
+  const [categories, setCategories] = useState([]);
 
   const fetchMenu = async () => {
     setLoading(true);
@@ -74,6 +75,15 @@ export const AppProvider = ({ children }) => {
     router.push('/');
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+    }
+  };
+
   return (
     <AppContext.Provider value={{ 
       token, 
@@ -85,7 +95,9 @@ export const AppProvider = ({ children }) => {
       loading, 
       fetchMenu, 
       notification, 
-      triggerNotification 
+      triggerNotification,
+      categories,       
+      fetchCategories  
     }}>
       {children}
     </AppContext.Provider>
