@@ -16,12 +16,12 @@ import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
-    // 1. This loads your .env file
+    
     ConfigModule.forRoot({
       isGlobal: true,
     }),
 
-    // 2. This connects to PostgreSQL using the values from the .env file
+    
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -34,7 +34,7 @@ import { CategoriesModule } from './categories/categories.module';
         database: configService.get<string>('DB_NAME'),
         autoLoadEntities: true,
         entities: [User],
-        synchronize: true, // Keep this true for development only
+        synchronize: true, 
       }),
     }),
     UserModule,
@@ -47,14 +47,13 @@ import { CategoriesModule } from './categories/categories.module';
   controllers: [AppController],
   providers: [
     AppService,
-    // This applies your JWT Bouncer to the whole app
     {
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard, // This applies your Role Bouncer to the whole app
+      useClass: RolesGuard, 
     },
   ],
 })
