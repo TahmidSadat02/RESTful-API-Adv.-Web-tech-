@@ -41,7 +41,14 @@ export class OrdersService {
       items: orderItems,
     });
 
+    // 1. Save the order to the database
     const savedOrder = await this.orderRepository.save(order);
+
+    // 2. NEW FIX: Fetch the order back from the DB to securely grab the real Customer Name
+    const fullOrderDetails = await this.orderRepository.findOne({
+      where: { id: savedOrder.id },
+      relations: ['customer'],
+    });
 
     const emailItems = orderItems.map((item) => ({
       name: item.menuItem.name,
@@ -49,10 +56,11 @@ export class OrdersService {
       price: (item.unitPrice * item.quantity).toFixed(2),
     }));
 
+    // 3. Send the email using the database-verified name
     this.mailService
       .sendOrderConfirmation(
         user.email,
-        user.fullName || 'Customer',
+        fullOrderDetails?.customer?.fullName || 'Customer', // Pulls your real name!
         savedOrder.id,
         totalPrice,
         emailItems,
@@ -83,7 +91,7 @@ export class OrdersService {
     this.mailService
       .sendOrderStatusUpdate(
         order.customer.email,
-        order.customer.fullName || 'Customer',
+        order.customer.fullName || 'Customer', 
         order.id,
         status,
       )

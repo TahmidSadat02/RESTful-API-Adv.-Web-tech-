@@ -9,7 +9,7 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Welcome to CoffeeShop!',
-      template: './welcome', // Matches welcome.hbs
+      template: './welcome', 
       context: {
         name: name,
       },
@@ -44,7 +44,7 @@ export class MailService {
   ) {
     await this.mailerService.sendMail({
       to: email,
-      subject: `Your Order is ${status.toUpperCase()} - #${orderId}`, // Required subject format
+      subject: `Your Order is ${status.toUpperCase()} - #${orderId}`, 
       template: './order-status',
       context: {
         customerName: name,
