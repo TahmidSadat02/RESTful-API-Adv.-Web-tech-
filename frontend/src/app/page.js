@@ -15,9 +15,10 @@ export default function MenuPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [quantities, setQuantities] = useState({});
   const [selectedCategoryId, setSelectedCategoryId] = useState('all');
-  
-  // --- NEW: State for the Confirmation Modal ---
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  
+  // --- NEW: State for Search Bar ---
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (token && userRole === 'admin') {
@@ -49,9 +50,8 @@ export default function MenuPage() {
     setQuantities(prev => ({ ...prev, [item.id]: 1 })); 
   };
 
-  // --- UPDATED: Actual Checkout Logic (Called from the Modal) ---
   const confirmAndPlaceOrder = async () => {
-    if (cart.length === 0) return;
+    if (!cart || cart.length === 0) return;
     setIsCheckingOut(true);
 
     try {
@@ -64,7 +64,7 @@ export default function MenuPage() {
       
       triggerNotification("Success! Your order has been placed. Check your email.");
       clearCart();
-      setShowConfirmModal(false); // Close the modal upon success
+      setShowConfirmModal(false); 
     } catch (error) {
       console.error("Order failed:", error);
       triggerNotification(error.response?.data?.message || "Failed to place order.");
@@ -73,11 +73,18 @@ export default function MenuPage() {
     }
   };
 
-  const filteredItems = selectedCategoryId === 'all' 
-    ? menuItems 
-    : menuItems.filter(item => item.category?.id === selectedCategoryId);
+  // --- UPDATED: Filter by BOTH Category AND Search Query ---
+  const filteredItems = menuItems.filter(item => {
+    const matchesCategory = selectedCategoryId === 'all' || item.category?.id === selectedCategoryId;
+    
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = item.name.toLowerCase().includes(searchLower) || 
+                          (item.description && item.description.toLowerCase().includes(searchLower));
+                          
+    return matchesCategory && matchesSearch;
+  });
 
-  const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const cartTotal = (cart || []).reduce((total, item) => total + (item.price * item.quantity), 0);
 
   return (
     <div className="py-8 pb-32">
@@ -88,7 +95,20 @@ export default function MenuPage() {
         <p className="text-amber-800 font-medium">Where great coffee meets great code. Enjoy our curated selection of premium brews.</p>
       </div>
       
-      <h2 className="text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">Our Menu</h2>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Our Menu</h2>
+        
+        {/* --- NEW: Search Input UI --- */}
+        <div className="w-full md:w-1/3">
+          <input
+            type="text"
+            placeholder="🔍 Search menu..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full p-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition-all shadow-sm"
+          />
+        </div>
+      </div>
 
       {!loading && (
         <div className="flex flex-wrap gap-3 mb-8">
@@ -119,7 +139,7 @@ export default function MenuPage() {
         <div className="text-center py-12 text-gray-500 text-lg">Loading freshly brewed menu...</div>
       ) : filteredItems.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200 text-gray-500 text-lg">
-          {selectedCategoryId === 'all' ? "No items found in the database." : "No items found in this category."}
+          {searchQuery ? `No items found matching "${searchQuery}".` : (selectedCategoryId === 'all' ? "No items found in the database." : "No items found in this category.")}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -168,7 +188,7 @@ export default function MenuPage() {
       )}
 
       {/* Floating Cart Panel */}
-      {cart.length > 0 && (
+      {(cart || []).length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-4 md:p-6 z-40 animate-fade-in-up">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
@@ -191,7 +211,7 @@ export default function MenuPage() {
                 <p className="text-2xl font-extrabold text-emerald-600">৳{cartTotal.toFixed(2)}</p>
               </div>
               <button 
-                onClick={() => setShowConfirmModal(true)} // Open the modal instead of instantly buying
+                onClick={() => setShowConfirmModal(true)} 
                 className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-xl transition-colors shadow-lg"
               >
                 Checkout Now
@@ -202,7 +222,7 @@ export default function MenuPage() {
         </div>
       )}
 
-      {/* --- NEW: Confirmation Modal --- */}
+      {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-60 px-4 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-fade-in-up">
@@ -210,10 +230,9 @@ export default function MenuPage() {
             <h3 className="text-3xl font-extrabold text-gray-900 mb-2">Confirm Order</h3>
             <p className="text-gray-600 font-medium mb-6">You are about to place an order for <span className="font-bold text-emerald-600">৳{cartTotal.toFixed(2)}</span>.</p>
             
-            {/* The Warning Box */}
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-8">
               <p className="text-red-800 font-bold text-sm mb-1">
-                 Final Step
+                ⚠️ Final Step
               </p>
               <p className="text-red-700 text-sm font-medium">
                 Once you confirmed order, you can't cancel your order. Our baristas will begin preparing it immediately.
