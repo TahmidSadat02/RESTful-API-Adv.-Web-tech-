@@ -48,7 +48,6 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-center min-h-[70vh]">
       <div className="w-full max-w-md bg-white p-10 rounded-2xl border border-gray-200 shadow-lg">
-        {/* Changed heading so it applies to both Admins and Customers */}
         <h1 className="text-3xl font-extrabold text-gray-900 text-center mb-2">Welcome Back</h1>
         <p className="text-gray-600 text-center mb-8 font-medium">Sign in to your account.</p>
 
@@ -70,16 +69,24 @@ export default function LoginPage() {
             className={inputClass}
           />
 
-          <input
-            id="password"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-            className={inputClass}
-          />
+          <div>
+            <input
+              id="password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+              className={inputClass}
+            />
+            {/* NEW: Forgot Password Link added here */}
+            <div className="text-right mt-2">
+              <Link href="/forgot-password" className="text-sm font-bold text-emerald-600 hover:text-emerald-500 transition-colors">
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
 
           <button
             type="submit"

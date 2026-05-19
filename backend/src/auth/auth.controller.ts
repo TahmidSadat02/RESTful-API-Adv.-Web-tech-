@@ -29,6 +29,18 @@ export class AuthController {
     return { message: 'This is a protected route', user: req.user };
   }
 
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  async resetPassword(@Body() body: any) {
+    return this.authService.resetPassword(body.token, body.newPassword);
+  }
+
   @Roles(UserRole.ADMIN)
   @Get('admin-dashboard')
   getAdminDashboard(@Request() req) {
