@@ -25,9 +25,16 @@ export default function Navbar() {
         )}
 
         {token ? (
-          <button onClick={logout} className="text-red-600 font-medium hover:text-red-800 transition-colors">
-            Logout
-          </button>
+          <>
+            {/* NEW: Change Password link for logged-in users */}
+            <Link href="/change-password" className="text-gray-900 font-medium hover:text-gray-600 transition-colors">
+              Change Password
+            </Link>
+            
+            <button onClick={logout} className="text-red-600 font-medium hover:text-red-800 transition-colors">
+              Logout
+            </button>
+          </>
         ) : (
           <>
             <Link href="/login" className="text-gray-900 font-medium hover:text-gray-600 transition-colors">
