@@ -1,6 +1,6 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThan } from 'typeorm'; // Added MoreThan for expiration check
+import { Repository, MoreThan } from 'typeorm'; 
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { User } from '../user/user.entity';
@@ -87,7 +87,6 @@ export class AuthService {
     user.resetPasswordExpires = new Date(Date.now() + 3600000); 
     await this.userRepository.save(user);
 
-    
     const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
     
     this.mailService.sendPasswordResetEmail(user.email, user.fullName || 'Customer', resetLink)
@@ -99,7 +98,6 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    // Find the user with this exact token AND make sure it hasn't expired
     const user = await this.userRepository.findOne({
       where: {
         resetPasswordToken: token,
@@ -118,8 +116,8 @@ export class AuthService {
 
     return { message: 'Password has been successfully reset!' };
   }
-  async changePassword(userId: number, dto: any) {
 
+  async changePassword(userId: number, dto: any) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -129,6 +127,11 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Incorrect current password');
     }
+
+    if (dto.oldPassword === dto.newPassword) {
+      throw new BadRequestException('New password cannot be the same as the current password.');
+    }
+
     user.password = await bcrypt.hash(dto.newPassword, 10);
     await this.userRepository.save(user);
 
